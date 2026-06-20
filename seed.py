@@ -7,6 +7,7 @@ Loaded into the SQLite database created by init_db.py
 
 import sqlite3
 from ctext import setapikey, setremap, gettextasparagrapharray
+import jieba # Chinese tokenizer
 
 DB_PATH = "analects.db"
 
@@ -59,6 +60,13 @@ def seed():
                 (passage_id, book_num, chapter_num, text),
             )
             total_inserted += 1
+
+            segmented = " ".join(jieba.cut(text))
+            cur.execute(
+                "INSERT INTO passages_fts (id, text) VALUES (?, ?)",
+                (passage_id, segmented),
+            )
+
 
         print(f"{len(passages)} passages")
 

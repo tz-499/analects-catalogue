@@ -20,9 +20,6 @@ def init_db():
 
     cur.executescript("""
         DROP TABLE IF EXISTS passages_fts;
-        DROP TRIGGER IF EXISTS passages_ai;
-        DROP TRIGGER IF EXISTS passages_au;
-        DROP TRIGGER IF EXISTS passages_ad;
         DROP TABLE IF EXISTS tags;
         DROP TABLE IF EXISTS passages;
     """)
@@ -56,23 +53,22 @@ def init_db():
     cur.execute("""
         CREATE VIRTUAL TABLE passages_fts USING fts5(
             id UNINDEXED,
-            text,
-            tokenize = "unicode61 categories 'L* N* Co'"
+            text
         );
     """)
 
-    # Create the triggers to keep passage_fts in sync with passages
-    cur.executescript("""
-        CREATE TRIGGER passages_ai AFTER INSERT ON passages BEGIN
-            INSERT INTO passages_fts (id, text) VALUES (new.id, new.text);
-        END;
-        CREATE TRIGGER passages_au AFTER UPDATE ON passages BEGIN
-            UPDATE passages_fts SET text = new.text WHERE id = new.id;
-        END;
-        CREATE TRIGGER passages_ad AFTER DELETE ON passages BEGIN
-            DELETE FROM passages_fts WHERE id = old.id;
-        END;
-    """)
+    # # Create the triggers to keep passage_fts in sync with passages
+    # cur.executescript("""
+    #     CREATE TRIGGER passages_ai AFTER INSERT ON passages BEGIN
+    #         INSERT INTO passages_fts (id, text) VALUES (new.id, new.text);
+    #     END;
+    #     CREATE TRIGGER passages_au AFTER UPDATE ON passages BEGIN
+    #         UPDATE passages_fts SET text = new.text WHERE id = new.id;
+    #     END;
+    #     CREATE TRIGGER passages_ad AFTER DELETE ON passages BEGIN
+    #         DELETE FROM passages_fts WHERE id = old.id;
+    #     END;
+    # """)
 
     conn.commit()
     conn.close()
